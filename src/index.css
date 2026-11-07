@@ -1,35 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --goat-black: #0B0B0B;
-  --goat-dark: #1A1A1A;
-  --goat-orange: #FF6A00;
-  --goat-orange-light: #FF8C3A;
+  /* Charte GOAT225 */
+  --goat-navy: #12274A;
+  --goat-navy-deep: #0C1C38;
+  --goat-navy-light: #1B3563;
+  --goat-red: #E01B1B;
+  --goat-red-light: #F2383A;
   --goat-white: #FFFFFF;
 
-  --background: 0 0% 4.3%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 10.2%;
-  --card-foreground: 0 0% 98%;
-  --popover: 0 0% 10.2%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 24 100% 50%;
-  --primary-foreground: 0 0% 4.3%;
-  --secondary: 0 0% 14.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 14.9%;
-  --muted-foreground: 0 0% 63.9%;
-  --accent: 24 100% 50%;
-  --accent-foreground: 0 0% 4.3%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 18%;
-  --input: 0 0% 18%;
-  --ring: 24 100% 50%;
+  --background: 217 61% 18%;
+  --foreground: 0 0% 100%;
+  --card: 218 57% 25%;
+  --card-foreground: 0 0% 100%;
+  --popover: 218 57% 25%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 0 79% 49%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 218 57% 25%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 218 57% 25%;
+  --muted-foreground: 217 31% 79%;
+  --accent: 0 79% 49%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 79% 49%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 218 40% 32%;
+  --input: 218 40% 32%;
+  --ring: 0 79% 49%;
   --radius: 0.75rem;
 }
 
@@ -41,8 +41,8 @@ html, body, #root {
   margin: 0;
   padding: 0;
   min-height: 100%;
-  background-color: #0B0B0B;
-  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #12274A;
+  font-family: 'Montserrat', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -57,10 +57,10 @@ body {
   width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #1A1A1A;
+  background: #0C1C38;
 }
 ::-webkit-scrollbar-thumb {
-  background: #FF6A00;
+  background: #E01B1B;
   border-radius: 2px;
 }
 
@@ -75,8 +75,8 @@ body {
 
 /* Timer glow animation */
 @keyframes pulse-orange {
-  0%, 100% { text-shadow: 0 0 20px rgba(255, 106, 0, 0.5); }
-  50% { text-shadow: 0 0 60px rgba(255, 106, 0, 1); }
+  0%, 100% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.35); }
+  50% { text-shadow: 0 0 50px rgba(255, 255, 255, 0.8); }
 }
 
 @keyframes pulse-red {
@@ -105,23 +105,60 @@ body {
 
 /* Glass card */
 .glass {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .glass-orange {
-  background: rgba(255, 106, 0, 0.08);
+  background: rgba(224, 27, 27, 0.12);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 106, 0, 0.2);
+  border: 1px solid rgba(224, 27, 27, 0.35);
 }
 
 /* Gradient text */
 .text-gradient {
-  background: linear-gradient(135deg, #FF6A00, #FF8C3A);
+  background: linear-gradient(135deg, #E01B1B, #F2383A);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Grain discret sur les fonds bleu nuit */
+.grain {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+
+/* Confettis de l'écran Vainqueur */
+@keyframes confetti-fall {
+  0% { transform: translateY(-40px) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(540deg); opacity: 1; }
+}
+.confetti {
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  animation: confetti-fall 3.6s linear infinite;
+}
+
+@keyframes crown-float {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-6px) rotate(6deg); }
+}
+.crown-float { animation: crown-float 2.4s ease-in-out infinite; }
+
+@keyframes ring-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(224, 27, 27, 0.6); }
+  100% { box-shadow: 0 0 0 28px rgba(224, 27, 27, 0); }
+}
+.ring-pulse { animation: ring-pulse 1.8s ease-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti, .crown-float, .ring-pulse, .timer-orange, .timer-red { animation: none; }
 }

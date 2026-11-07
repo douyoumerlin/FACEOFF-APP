@@ -43,14 +43,14 @@ export default function NewMatch() {
   }
 
   return (
-    <div className="min-h-screen bg-goat-black">
+    <div className="min-h-screen bg-goat-navy">
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-goat-orange/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-goat-red/5 rounded-full blur-3xl" />
       </div>
 
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-goat-black/80 backdrop-blur-md border-b border-white/5">
+      <div className="sticky top-0 z-10 bg-goat-navy/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
           <button
             onClick={() => navigate('/')}
@@ -58,7 +58,7 @@ export default function NewMatch() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-black text-white flex-1">Nouveau Match</h1>
+          <h1 className="font-display text-3xl leading-none tracking-wide text-white flex-1">Nouveau Match</h1>
         </div>
       </div>
 
@@ -67,7 +67,7 @@ export default function NewMatch() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Player 1 */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold text-gray-500 tracking-widest uppercase">Joueur 1</p>
+            <p className="text-xs font-semibold text-goat-mist-dim tracking-widest uppercase">Joueur 1</p>
             <PlayerSearch
               onSelect={setPlayer1}
               excluded={player2 ? [player2.id] : []}
@@ -92,12 +92,12 @@ export default function NewMatch() {
                       {player1.nom}
                     </p>
                     {player1.surnom && (
-                      <p className="text-goat-orange text-sm mt-1">{player1.surnom}</p>
+                      <p className="text-goat-red-soft text-sm mt-1">{player1.surnom}</p>
                     )}
                   </div>
                   <button
                     onClick={() => setPlayer1(null)}
-                    className="text-gray-500 hover:text-white transition-colors"
+                    className="text-goat-mist-dim hover:text-white transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -109,7 +109,7 @@ export default function NewMatch() {
                   animate={{ opacity: 1 }}
                   className="glass rounded-2xl p-5 h-24 flex items-center justify-center border-2 border-dashed border-white/10"
                 >
-                  <p className="text-gray-600 text-sm">Aucun joueur sélectionné</p>
+                  <p className="text-goat-mist-dim text-sm">Aucun joueur sélectionné</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -122,7 +122,7 @@ export default function NewMatch() {
 
           {/* Player 2 */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold text-gray-500 tracking-widest uppercase">Joueur 2</p>
+            <p className="text-xs font-semibold text-goat-mist-dim tracking-widest uppercase">Joueur 2</p>
             <PlayerSearch
               onSelect={setPlayer2}
               excluded={player1 ? [player1.id] : []}
@@ -147,12 +147,12 @@ export default function NewMatch() {
                       {player2.nom}
                     </p>
                     {player2.surnom && (
-                      <p className="text-goat-orange text-sm mt-1">{player2.surnom}</p>
+                      <p className="text-goat-red-soft text-sm mt-1">{player2.surnom}</p>
                     )}
                   </div>
                   <button
                     onClick={() => setPlayer2(null)}
-                    className="text-gray-500 hover:text-white transition-colors"
+                    className="text-goat-mist-dim hover:text-white transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -164,7 +164,7 @@ export default function NewMatch() {
                   animate={{ opacity: 1 }}
                   className="glass rounded-2xl p-5 h-24 flex items-center justify-center border-2 border-dashed border-white/10"
                 >
-                  <p className="text-gray-600 text-sm">Aucun joueur sélectionné</p>
+                  <p className="text-goat-mist-dim text-sm">Aucun joueur sélectionné</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -178,7 +178,7 @@ export default function NewMatch() {
 
         {/* Time settings */}
         <div className="glass rounded-2xl p-6 space-y-4">
-          <p className="text-sm font-semibold text-gray-400 tracking-widest uppercase">Durée du match</p>
+          <p className="text-sm font-semibold text-goat-mist tracking-widest uppercase">Durée du match</p>
           <div className="grid grid-cols-4 gap-3">
             {TIME_OPTIONS.map((opt) => (
               <button
@@ -186,8 +186,8 @@ export default function NewMatch() {
                 onClick={() => { setTime(opt.seconds); setCustomTime(''); }}
                 className={`py-3 rounded-xl font-bold transition-colors ${
                   time === opt.seconds && !customTime
-                    ? 'bg-goat-orange text-goat-black'
-                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                    ? 'bg-goat-red text-white'
+                    : 'bg-white/5 text-goat-mist hover:bg-white/10'
                 }`}
               >
                 {opt.label}
@@ -204,7 +204,7 @@ export default function NewMatch() {
                 if (!isNaN(mins) && mins > 0) setTime(mins * 60);
               }}
               placeholder="Durée personnalisée (minutes)"
-              className="flex-1 bg-goat-dark border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-goat-orange transition-colors"
+              className="flex-1 bg-goat-navy-deep border border-white/10 rounded-xl px-4 py-3 text-white placeholder-goat-mist-dim focus:outline-none focus:border-goat-red transition-colors"
             />
           </div>
         </div>
@@ -221,7 +221,7 @@ export default function NewMatch() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={handleStart}
-                className="w-full py-6 rounded-2xl bg-goat-orange text-goat-black font-black text-2xl tracking-wide shadow-xl shadow-goat-orange/30 hover:bg-goat-orange-light transition-colors flex items-center justify-center gap-3"
+                className="w-full py-6 rounded-2xl bg-goat-red text-white font-black text-2xl tracking-wide shadow-xl shadow-goat-red/30 hover:bg-goat-red-light transition-colors flex items-center justify-center gap-3"
               >
                 <Flame className="w-7 h-7" strokeWidth={2.5} />
                 COMMENCER LE FACE OFF

@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Clock, Volume2, Zap, Maximize } from 'lucide-react';
 import { useSettingsStore } from '../store/settingsStore';
+import logoFondSombre from '../assets/brand/logo-fond-sombre.png';
 
 const TIME_OPTIONS = [
   { label: '3 min', seconds: 180 },
@@ -21,17 +22,17 @@ interface ToggleRowProps {
 function ToggleRow({ icon, label, description, value, onChange }: ToggleRowProps) {
   return (
     <div className="flex items-center gap-4 py-4 border-b border-white/5 last:border-0">
-      <div className="w-10 h-10 rounded-xl bg-goat-orange/10 flex items-center justify-center text-goat-orange flex-shrink-0">
+      <div className="w-10 h-10 rounded-xl bg-goat-red/10 flex items-center justify-center text-goat-red-soft flex-shrink-0">
         {icon}
       </div>
       <div className="flex-1">
         <p className="font-semibold text-white">{label}</p>
-        <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+        <p className="text-xs text-goat-mist-dim mt-0.5">{description}</p>
       </div>
       <button
         onClick={() => onChange(!value)}
         className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${
-          value ? 'bg-goat-orange' : 'bg-white/10'
+          value ? 'bg-goat-red' : 'bg-white/10'
         }`}
       >
         <motion.span
@@ -59,9 +60,9 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-goat-black">
+    <div className="min-h-screen bg-goat-navy">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-goat-black/80 backdrop-blur-md border-b border-white/5">
+      <div className="sticky top-0 z-10 bg-goat-navy/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
           <button
             onClick={() => navigate('/')}
@@ -69,7 +70,7 @@ export default function Settings() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-black text-white">Paramètres</h1>
+          <h1 className="font-display text-3xl leading-none tracking-wide text-white">Paramètres</h1>
         </div>
       </div>
 
@@ -77,12 +78,12 @@ export default function Settings() {
         {/* Default time */}
         <div className="glass rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-goat-orange/10 flex items-center justify-center text-goat-orange">
+            <div className="w-10 h-10 rounded-xl bg-goat-red/10 flex items-center justify-center text-goat-red-soft">
               <Clock className="w-5 h-5" />
             </div>
             <div>
               <p className="font-semibold text-white">Durée par défaut</p>
-              <p className="text-xs text-gray-500">Temps affiché lors d'un nouveau match</p>
+              <p className="text-xs text-goat-mist-dim">Temps affiché lors d'un nouveau match</p>
             </div>
           </div>
           <div className="grid grid-cols-4 gap-2">
@@ -92,8 +93,8 @@ export default function Settings() {
                 onClick={() => update({ defaultTime: opt.seconds })}
                 className={`py-3 rounded-xl font-bold text-sm transition-colors ${
                   defaultTime === opt.seconds
-                    ? 'bg-goat-orange text-goat-black'
-                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                    ? 'bg-goat-red text-white'
+                    : 'bg-white/5 text-goat-mist hover:bg-white/10'
                 }`}
               >
                 {opt.label}
@@ -128,10 +129,11 @@ export default function Settings() {
         </div>
 
         {/* App info */}
-        <div className="glass rounded-2xl p-5 text-center space-y-1">
-          <p className="font-black text-white text-lg">GOAT225</p>
-          <p className="text-goat-orange text-sm">Referee App v1.0.0</p>
-          <p className="text-gray-600 text-xs">Données stockées localement</p>
+        <div className="glass rounded-2xl p-5 flex flex-col items-center text-center gap-1">
+          <img src={logoFondSombre} alt="Logo GOAT225" className="w-14 h-14 object-contain mb-1" />
+          <p className="font-display text-3xl leading-none text-white">FACE<span className="text-goat-red">OFF</span></p>
+          <p className="text-goat-mist text-sm">v1.0.0 · by GOAT225</p>
+          <p className="text-goat-mist-dim text-xs">Données stockées localement</p>
         </div>
       </div>
     </div>

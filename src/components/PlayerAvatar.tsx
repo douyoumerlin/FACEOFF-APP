@@ -21,7 +21,7 @@ export function PlayerAvatar({ player, size = 'md', className }: PlayerAvatarPro
     <div
       className={cn(
         'rounded-full flex items-center justify-center font-bold flex-shrink-0 overflow-hidden',
-        'bg-gradient-to-br from-goat-orange to-goat-orange-light text-goat-black',
+        'bg-gradient-to-br from-goat-red to-goat-red-light text-white',
         sizes[size],
         className
       )}

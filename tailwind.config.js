@@ -15,15 +15,22 @@ export default {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Montserrat', 'system-ui', 'sans-serif'],
+        display: ['"Bebas Neue"', 'Impact', 'sans-serif'],
       },
       colors: {
+        // Charte GOAT225 : bleu nuit, rouge, blanc
         goat: {
-          black: '#0B0B0B',
-          dark: '#1A1A1A',
-          orange: '#FF6A00',
-          'orange-light': '#FF8C3A',
+          navy: '#12274A',
+          'navy-deep': '#0C1C38',
+          'navy-light': '#1B3563',
+          red: '#E01B1B',
+          'red-light': '#F2383A',
+          // Rouge éclairci pour les petits textes sur bleu nuit (contraste AA)
+          'red-soft': '#FF6B6B',
           white: '#FFFFFF',
+          mist: '#B8C4D9',
+          'mist-dim': '#8EA0BF',
         },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',

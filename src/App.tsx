@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -12,15 +12,15 @@ const Settings = lazy(() => import('./pages/Settings'));
 
 function Loader() {
   return (
-    <div className="min-h-screen bg-goat-black flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-goat-orange border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen bg-goat-navy flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-goat-red border-t-transparent rounded-full animate-spin" />
     </div>
   );
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Suspense fallback={<Loader />}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -33,6 +33,6 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
-    </BrowserRouter>
+    </HashRouter>
   );
 }

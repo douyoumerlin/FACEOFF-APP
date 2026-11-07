@@ -69,9 +69,9 @@ export default function Players() {
   }
 
   return (
-    <div className="min-h-screen bg-goat-black">
+    <div className="min-h-screen bg-goat-navy">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-goat-black/80 backdrop-blur-md border-b border-white/5">
+      <div className="sticky top-0 z-10 bg-goat-navy/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
           <button
             onClick={() => navigate('/')}
@@ -79,10 +79,10 @@ export default function Players() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-black text-white flex-1">Joueurs</h1>
+          <h1 className="font-display text-3xl leading-none tracking-wide text-white flex-1">Joueurs</h1>
           <button
             onClick={openAdd}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-goat-orange text-goat-black font-bold text-sm hover:bg-goat-orange-light transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-goat-red text-white font-bold text-sm hover:bg-goat-red-light transition-colors"
           >
             <Plus className="w-4 h-4" />
             Ajouter
@@ -93,17 +93,17 @@ export default function Players() {
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-goat-mist-dim" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Rechercher par nom, prénom ou surnom..."
-            className="w-full bg-goat-dark border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-goat-orange transition-colors"
+            className="w-full bg-goat-navy-deep border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white placeholder-goat-mist-dim focus:outline-none focus:border-goat-red transition-colors"
           />
         </div>
 
         {/* Count */}
-        <p className="text-gray-500 text-sm">{filtered.length} joueur{filtered.length !== 1 ? 's' : ''}</p>
+        <p className="text-goat-mist-dim text-sm">{filtered.length} joueur{filtered.length !== 1 ? 's' : ''}</p>
 
         {/* Players list */}
         <motion.div layout className="space-y-3">
@@ -124,18 +124,18 @@ export default function Players() {
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
                     {player.surnom && (
-                      <span className="text-goat-orange text-xs font-medium">{player.surnom}</span>
+                      <span className="text-goat-red-soft text-xs font-medium">{player.surnom}</span>
                     )}
-                    {player.surnom && player.numero && <span className="text-gray-600 text-xs">·</span>}
+                    {player.surnom && player.numero && <span className="text-goat-mist-dim text-xs">·</span>}
                     {player.numero && (
-                      <span className="text-gray-500 text-xs">#{player.numero}</span>
+                      <span className="text-goat-mist-dim text-xs">#{player.numero}</span>
                     )}
                   </div>
                 </div>
                 <span className={`text-xs px-2 py-1 rounded-full font-semibold flex-shrink-0 ${
                   player.categorie === 'Pro'
-                    ? 'bg-goat-orange/20 text-goat-orange'
-                    : 'bg-white/10 text-gray-400'
+                    ? 'bg-goat-red/20 text-goat-red-soft'
+                    : 'bg-white/10 text-goat-mist'
                 }`}>
                   {player.categorie}
                 </span>
@@ -144,7 +144,7 @@ export default function Players() {
                     onClick={() => openEdit(player)}
                     className="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
                   >
-                    <Edit2 className="w-4 h-4 text-gray-400" />
+                    <Edit2 className="w-4 h-4 text-goat-mist" />
                   </button>
                   <button
                     onClick={() => setDeleteId(player.id)}
@@ -158,7 +158,7 @@ export default function Players() {
           </AnimatePresence>
 
           {filtered.length === 0 && (
-            <div className="text-center py-16 text-gray-600">
+            <div className="text-center py-16 text-goat-mist-dim">
               <p className="text-lg font-semibold">Aucun joueur</p>
               <p className="text-sm mt-1">Ajoutez des joueurs pour commencer</p>
             </div>
@@ -187,12 +187,12 @@ export default function Players() {
               className="relative glass rounded-2xl p-6 w-full max-w-md space-y-4"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-black text-white">
+                <h2 className="font-display text-3xl leading-none tracking-wide text-white">
                   {editingId ? 'Modifier' : 'Nouveau joueur'}
                 </h2>
                 <button
                   onClick={() => setShowForm(false)}
-                  className="text-gray-500 hover:text-white"
+                  className="text-goat-mist-dim hover:text-white"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -200,45 +200,45 @@ export default function Players() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Prénom *</label>
+                  <label className="text-xs text-goat-mist-dim mb-1 block">Prénom *</label>
                   <input
                     value={form.prenom}
                     onChange={(e) => setForm({ ...form, prenom: e.target.value })}
-                    className="w-full bg-goat-dark border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-goat-orange transition-colors"
+                    className="w-full bg-goat-navy-deep border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-goat-red transition-colors"
                     placeholder="Prénom"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Nom *</label>
+                  <label className="text-xs text-goat-mist-dim mb-1 block">Nom *</label>
                   <input
                     value={form.nom}
                     onChange={(e) => setForm({ ...form, nom: e.target.value })}
-                    className="w-full bg-goat-dark border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-goat-orange transition-colors"
+                    className="w-full bg-goat-navy-deep border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-goat-red transition-colors"
                     placeholder="Nom"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Surnom</label>
+                  <label className="text-xs text-goat-mist-dim mb-1 block">Surnom</label>
                   <input
                     value={form.surnom}
                     onChange={(e) => setForm({ ...form, surnom: e.target.value })}
-                    className="w-full bg-goat-dark border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-goat-orange transition-colors"
+                    className="w-full bg-goat-navy-deep border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-goat-red transition-colors"
                     placeholder="Surnom"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Numéro</label>
+                  <label className="text-xs text-goat-mist-dim mb-1 block">Numéro</label>
                   <input
                     value={form.numero}
                     onChange={(e) => setForm({ ...form, numero: e.target.value })}
-                    className="w-full bg-goat-dark border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-goat-orange transition-colors"
+                    className="w-full bg-goat-navy-deep border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-goat-red transition-colors"
                     placeholder="#23"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs text-gray-500 mb-2 block">Catégorie</label>
+                <label className="text-xs text-goat-mist-dim mb-2 block">Catégorie</label>
                 <div className="flex gap-3">
                   {(['Pro', 'Amateur'] as Category[]).map((cat) => (
                     <button
@@ -246,8 +246,8 @@ export default function Players() {
                       onClick={() => setForm({ ...form, categorie: cat })}
                       className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${
                         form.categorie === cat
-                          ? 'bg-goat-orange text-goat-black'
-                          : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                          ? 'bg-goat-red text-white'
+                          : 'bg-white/5 text-goat-mist hover:bg-white/10'
                       }`}
                     >
                       {cat}
@@ -257,11 +257,11 @@ export default function Players() {
               </div>
 
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">URL Photo</label>
+                <label className="text-xs text-goat-mist-dim mb-1 block">URL Photo</label>
                 <input
                   value={form.photo}
                   onChange={(e) => setForm({ ...form, photo: e.target.value })}
-                  className="w-full bg-goat-dark border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-goat-orange transition-colors"
+                  className="w-full bg-goat-navy-deep border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-goat-red transition-colors"
                   placeholder="https://..."
                 />
               </div>
@@ -269,7 +269,7 @@ export default function Players() {
               <button
                 onClick={handleSubmit}
                 disabled={!form.nom.trim() || !form.prenom.trim()}
-                className="w-full py-4 rounded-xl bg-goat-orange text-goat-black font-black text-lg disabled:opacity-40 hover:bg-goat-orange-light transition-colors flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-goat-red text-white font-black text-lg disabled:opacity-40 hover:bg-goat-red-light transition-colors flex items-center justify-center gap-2"
               >
                 <Check className="w-5 h-5" />
                 {editingId ? 'Enregistrer' : 'Ajouter'}
