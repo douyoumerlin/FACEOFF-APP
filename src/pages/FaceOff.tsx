@@ -9,19 +9,28 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Player } from '../types';
 import { formatTime } from '../lib/utils';
 
-function ScoreButton({ onClick, children, variant = 'plus' }: {
+type Side = 'red' | 'navy';
+
+function ScoreButton({ onClick, children, label, variant = 'plus', side }: {
   onClick: () => void;
   children: React.ReactNode;
+  label: string;
   variant?: 'plus' | 'minus';
+  side: Side;
 }) {
+  const plus = side === 'red'
+    ? 'bg-white text-goat-red hover:bg-goat-mist'
+    : 'bg-white text-goat-navy hover:bg-goat-mist';
+  const minus = side === 'red'
+    ? 'bg-goat-navy/30 text-white hover:bg-goat-navy/45'
+    : 'bg-white/10 text-white hover:bg-white/20';
   return (
     <motion.button
       whileTap={{ scale: 0.88 }}
       onClick={onClick}
-      className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl transition-colors ${
-        variant === 'plus'
-          ? 'bg-goat-orange text-goat-black hover:bg-goat-orange-light'
-          : 'bg-white/10 text-gray-400 hover:bg-white/15'
+      aria-label={label}
+      className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center font-display text-3xl transition-colors ${
+        variant === 'plus' ? plus : minus
       }`}
     >
       {children}
@@ -29,17 +38,86 @@ function ScoreButton({ onClick, children, variant = 'plus' }: {
   );
 }
 
-function ScoreDisplay({ score, animate }: { score: number; animate: boolean }) {
+function ScoreDisplay({ score, animate, flashColor }: { score: number; animate: boolean; flashColor: string }) {
   return (
     <motion.div
       key={score}
-      initial={animate ? { scale: 1.5, color: '#FF6A00' } : false}
+      initial={animate ? { scale: 1.4, color: flashColor } : false}
       animate={{ scale: 1, color: '#FFFFFF' }}
       transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-      className="text-7xl sm:text-8xl font-black text-white leading-none"
+      className="font-display tabular-nums leading-[0.85] text-white"
+      style={{ fontSize: 'clamp(6rem, 22vw, 11rem)' }}
     >
       {score}
     </motion.div>
+  );
+}
+
+function PlayerPanel({ player, side, score, faute, animate, onScore, onFaute }: {
+  player: Player;
+  side: Side;
+  score: number;
+  faute: number;
+  animate: boolean;
+  onScore: (delta: number) => void;
+  onFaute: (delta: number) => void;
+}) {
+  const isRed = side === 'red';
+  const name = `${player.prenom} ${player.nom}`;
+  return (
+    <div
+      className={`flex-1 flex flex-col items-center justify-center gap-4 p-5 sm:p-8 ${
+        isRed ? 'bg-goat-red pb-14 md:pb-8' : 'bg-goat-navy-light pt-14 md:pt-8'
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <PlayerAvatar player={player} size="md" className="ring-2 ring-white" />
+        <div className="min-w-0">
+          <p className="font-display text-3xl leading-none truncate">{name}</p>
+          <p className="text-xs font-bold tracking-[0.14em] uppercase mt-1 text-white/85">
+            {player.surnom ? `« ${player.surnom} » · ` : ''}{player.categorie}
+          </p>
+        </div>
+      </div>
+
+      <ScoreDisplay score={score} animate={animate} flashColor={isRed ? '#12274A' : '#FF6B6B'} />
+
+      <div className="flex gap-2">
+        <ScoreButton side={side} variant="minus" label={`Retirer un point à ${name}`} onClick={() => onScore(-1)}>
+          <Minus className="w-5 h-5" />
+        </ScoreButton>
+        <ScoreButton side={side} label={`Un point pour ${name}`} onClick={() => onScore(1)}>+1</ScoreButton>
+        <ScoreButton side={side} label={`Deux points pour ${name}`} onClick={() => onScore(2)}>+2</ScoreButton>
+      </div>
+
+      <div
+        className={`w-full max-w-xs rounded-xl px-3 py-2.5 flex items-center justify-between ${
+          isRed ? 'bg-goat-navy/25' : 'bg-white/10'
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          <Flag className="w-4 h-4" />
+          <span className="text-xs font-bold tracking-wider">FAUTES</span>
+          <span className="font-display text-2xl leading-none tabular-nums">{faute}</span>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => onFaute(-1)}
+            aria-label={`Retirer une faute à ${name}`}
+            className="w-8 h-8 rounded-lg bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
+          >
+            <Minus className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => onFaute(1)}
+            aria-label={`Faute pour ${name}`}
+            className="w-8 h-8 rounded-lg bg-white text-goat-navy hover:bg-goat-mist flex items-center justify-center transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -86,6 +164,23 @@ export default function FaceOff() {
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [running]);
+
+  // Raccourcis clavier (version bureau) : ← point J1, → point J2, Espace chrono
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (showEnd) return;
+      const target = e.target as HTMLElement | null;
+      if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+      if (e.code === 'ArrowLeft') { e.preventDefault(); changeScore(1, 1); }
+      else if (e.code === 'ArrowRight') { e.preventDefault(); changeScore(2, 1); }
+      else if (e.code === 'Space') {
+        e.preventDefault();
+        if (timeLeft > 0) setRunning((r) => !r);
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showEnd, timeLeft]);
 
   function handleReset() {
     setRunning(false);
@@ -150,9 +245,9 @@ export default function FaceOff() {
 
   const timerColor =
     timeLeft <= 10
-      ? 'text-red-500 timer-red'
+      ? 'text-goat-red-soft timer-red'
       : timeLeft <= 30
-      ? 'text-goat-orange timer-orange'
+      ? 'text-white timer-orange'
       : 'text-white';
 
   const j1 = currentMatch?.joueur1;
@@ -161,154 +256,98 @@ export default function FaceOff() {
   if (!j1 || !j2) return null;
 
   return (
-    <div className="min-h-screen bg-goat-black flex flex-col select-none">
-      {/* Background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-goat-orange/5 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative flex-1 flex flex-col px-4 py-6 gap-6 max-w-5xl mx-auto w-full">
-        {/* Timer section */}
-        <div className="flex flex-col items-center gap-4">
-          <motion.div
-            className={`font-black tracking-tighter leading-none text-center ${timerColor}`}
-            style={{ fontSize: 'clamp(4rem, 18vw, 9rem)' }}
+    <div className="min-h-screen bg-goat-navy grain flex flex-col select-none">
+      {/* Chrono */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 px-4 pt-6 pb-5">
+        <div className="flex items-center gap-3 px-6 py-2 rounded-full bg-goat-navy-deep border border-white/20">
+          <span
+            aria-hidden
+            className={`w-2.5 h-2.5 rounded-full ${running ? 'bg-goat-red animate-pulse' : 'bg-goat-mist-dim'}`}
+          />
+          <span
+            className={`font-display tabular-nums leading-none tracking-wide ${timerColor}`}
+            style={{ fontSize: 'clamp(3.5rem, 12vw, 6rem)' }}
           >
             {formatTime(timeLeft)}
-          </motion.div>
+          </span>
+        </div>
 
-          {/* Timer controls */}
-          <div className="flex gap-4">
-            {!running ? (
-              <motion.button
-                whileTap={{ scale: 0.92 }}
-                onClick={() => setRunning(true)}
-                disabled={timeLeft === 0}
-                className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-goat-orange text-goat-black font-black text-lg hover:bg-goat-orange-light transition-colors disabled:opacity-40 shadow-lg shadow-goat-orange/30"
-              >
-                <Play className="w-5 h-5" fill="currentColor" />
-                START
-              </motion.button>
-            ) : (
-              <motion.button
-                whileTap={{ scale: 0.92 }}
-                onClick={() => setRunning(false)}
-                className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-yellow-500 text-black font-black text-lg hover:bg-yellow-400 transition-colors shadow-lg shadow-yellow-500/20"
-              >
-                <Pause className="w-5 h-5" fill="currentColor" />
-                PAUSE
-              </motion.button>
-            )}
+        <div className="flex gap-3">
+          {!running ? (
             <motion.button
               whileTap={{ scale: 0.92 }}
-              onClick={handleReset}
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl glass text-gray-400 font-bold hover:bg-white/10 transition-colors"
+              onClick={() => setRunning(true)}
+              disabled={timeLeft === 0}
+              className="flex items-center gap-2 px-7 h-14 rounded-2xl bg-goat-red text-white font-display text-2xl tracking-wider hover:bg-goat-red-light transition-colors disabled:opacity-40 shadow-lg shadow-black/25"
             >
-              <RotateCcw className="w-5 h-5" />
-              RESET
+              <Play className="w-5 h-5" fill="currentColor" />
+              {elapsedRef.current > 0 ? 'REPRENDRE' : "C'EST PARTI"}
             </motion.button>
-          </div>
+          ) : (
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              onClick={() => setRunning(false)}
+              className="flex items-center gap-2 px-7 h-14 rounded-2xl bg-white text-goat-navy font-display text-2xl tracking-wider hover:bg-goat-mist transition-colors shadow-lg shadow-black/25"
+            >
+              <Pause className="w-5 h-5" fill="currentColor" />
+              PAUSE
+            </motion.button>
+          )}
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={handleReset}
+            aria-label="Réinitialiser le chrono"
+            className="w-14 h-14 rounded-2xl border border-white/20 bg-goat-navy-light text-white flex items-center justify-center hover:bg-white/15 transition-colors"
+          >
+            <RotateCcw className="w-5 h-5" />
+          </motion.button>
         </div>
+      </div>
 
-        {/* VS + Player cards */}
-        <div className="flex items-stretch gap-2 sm:gap-4 flex-1">
-          {/* Player 1 card */}
-          <div className="flex-1 glass rounded-2xl p-4 flex flex-col items-center gap-4">
-            <PlayerAvatar player={j1} size="lg" />
-            <div className="text-center">
-              <p className="font-black text-white text-lg leading-tight">{j1.prenom}</p>
-              <p className="font-black text-white text-lg leading-tight">{j1.nom}</p>
-              {j1.surnom && <p className="text-goat-orange text-xs mt-0.5">{j1.surnom}</p>}
-            </div>
+      {/* Arène : les deux joueurs face à face */}
+      <div className="relative flex-1 flex flex-col md:flex-row overflow-hidden">
+        <PlayerPanel
+          player={j1}
+          side="red"
+          score={score1}
+          faute={faute1}
+          animate={animScore1}
+          onScore={(d) => changeScore(1, d)}
+          onFaute={(d) => changeFaute(1, d)}
+        />
+        <PlayerPanel
+          player={j2}
+          side="navy"
+          score={score2}
+          faute={faute2}
+          animate={animScore2}
+          onScore={(d) => changeScore(2, d)}
+          onFaute={(d) => changeFaute(2, d)}
+        />
 
-            {/* Score */}
-            <ScoreDisplay score={score1} animate={animScore1} />
-            <div className="flex gap-2">
-              <ScoreButton onClick={() => changeScore(1, -1)} variant="minus"><Minus className="w-5 h-5" /></ScoreButton>
-              <ScoreButton onClick={() => changeScore(1, 1)}>+1</ScoreButton>
-              <ScoreButton onClick={() => changeScore(1, 2)}>+2</ScoreButton>
-            </div>
-
-            {/* Fautes */}
-            <div className="w-full glass-orange rounded-xl p-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Flag className="w-4 h-4 text-goat-orange" />
-                <span className="text-xs text-gray-400 font-semibold">FAUTES</span>
-                <span className="text-white font-black text-lg">{faute1}</span>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => changeFaute(1, -1)}
-                  className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/15 flex items-center justify-center transition-colors"
-                >
-                  <Minus className="w-3 h-3 text-gray-400" />
-                </button>
-                <button
-                  onClick={() => changeFaute(1, 1)}
-                  className="w-8 h-8 rounded-lg bg-goat-orange/20 hover:bg-goat-orange/30 flex items-center justify-center transition-colors"
-                >
-                  <Plus className="w-3 h-3 text-goat-orange" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* VS */}
-          <div className="flex flex-col items-center justify-center px-1">
-            <span className="text-2xl sm:text-4xl font-black text-gradient">VS</span>
-          </div>
-
-          {/* Player 2 card */}
-          <div className="flex-1 glass rounded-2xl p-4 flex flex-col items-center gap-4">
-            <PlayerAvatar player={j2} size="lg" />
-            <div className="text-center">
-              <p className="font-black text-white text-lg leading-tight">{j2.prenom}</p>
-              <p className="font-black text-white text-lg leading-tight">{j2.nom}</p>
-              {j2.surnom && <p className="text-goat-orange text-xs mt-0.5">{j2.surnom}</p>}
-            </div>
-
-            {/* Score */}
-            <ScoreDisplay score={score2} animate={animScore2} />
-            <div className="flex gap-2">
-              <ScoreButton onClick={() => changeScore(2, -1)} variant="minus"><Minus className="w-5 h-5" /></ScoreButton>
-              <ScoreButton onClick={() => changeScore(2, 1)}>+1</ScoreButton>
-              <ScoreButton onClick={() => changeScore(2, 2)}>+2</ScoreButton>
-            </div>
-
-            {/* Fautes */}
-            <div className="w-full glass-orange rounded-xl p-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Flag className="w-4 h-4 text-goat-orange" />
-                <span className="text-xs text-gray-400 font-semibold">FAUTES</span>
-                <span className="text-white font-black text-lg">{faute2}</span>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => changeFaute(2, -1)}
-                  className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/15 flex items-center justify-center transition-colors"
-                >
-                  <Minus className="w-3 h-3 text-gray-400" />
-                </button>
-                <button
-                  onClick={() => changeFaute(2, 1)}
-                  className="w-8 h-8 rounded-lg bg-goat-orange/20 hover:bg-goat-orange/30 flex items-center justify-center transition-colors"
-                >
-                  <Plus className="w-3 h-3 text-goat-orange" />
-                </button>
-              </div>
-            </div>
-          </div>
+        {/* Ligne de séparation en diagonale + badge VS */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 w-[140%] h-1.5 -translate-x-1/2 -translate-y-1/2 -rotate-6 md:w-1.5 md:h-[140%] md:rotate-6 bg-white"
+        />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-white border-4 border-goat-navy flex items-center justify-center shadow-xl shadow-black/35">
+          <span className="font-display text-[38px] leading-none text-goat-navy mt-1">VS</span>
         </div>
+      </div>
 
-        {/* End button */}
+      {/* Fin de match */}
+      <div className="px-4 py-5 flex flex-col items-center gap-3">
         <motion.button
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.97 }}
           onClick={handleEndMatch}
-          className="w-full py-5 rounded-2xl border-2 border-red-500/40 text-red-400 font-black text-lg hover:bg-red-500/10 transition-colors"
+          className="w-full max-w-md h-14 rounded-2xl border-2 border-white/30 text-white font-display text-2xl tracking-wider hover:bg-white/10 transition-colors"
         >
           TERMINER LE MATCH
         </motion.button>
+        <p className="hidden md:block text-xs text-goat-mist-dim">
+          Raccourcis : ← point {j1.prenom} · → point {j2.prenom} · Espace pour lancer ou mettre en pause
+        </p>
       </div>
 
       {/* End match dialog */}
@@ -321,24 +360,24 @@ export default function FaceOff() {
         onCancel={() => setShowEnd(false)}
       >
         <div className="space-y-3 my-4">
-          <p className="text-sm text-gray-400 mb-3">Sélectionner le vainqueur :</p>
+          <p className="text-sm text-goat-mist mb-3">Sélectionne le vainqueur :</p>
           {[j1, j2].map((p, i) => (
             <button
               key={p.id}
               onClick={() => setSelectedWinner(p)}
               className={`w-full flex items-center gap-3 p-4 rounded-xl transition-colors ${
                 selectedWinner?.id === p.id
-                  ? 'bg-goat-orange/20 border border-goat-orange'
+                  ? 'bg-goat-red/20 border border-goat-red'
                   : 'bg-white/5 border border-transparent hover:bg-white/10'
               }`}
             >
               <PlayerAvatar player={p} size="sm" />
               <div className="flex-1 text-left">
                 <p className="font-bold text-white">{p.prenom} {p.nom}</p>
-                <p className="text-sm text-gray-400">{i === 0 ? score1 : score2} pts</p>
+                <p className="text-sm text-goat-mist">{i === 0 ? score1 : score2} pts</p>
               </div>
               {selectedWinner?.id === p.id && (
-                <span className="text-goat-orange text-xs font-bold">VAINQUEUR</span>
+                <span className="bg-goat-red text-white text-xs font-bold px-2 py-1 rounded-md">VAINQUEUR</span>
               )}
             </button>
           ))}
@@ -347,9 +386,9 @@ export default function FaceOff() {
               onClick={() => setSelectedWinner(null)}
               className={`w-full p-3 rounded-xl text-sm transition-colors ${
                 selectedWinner === null
-                  ? 'bg-gray-500/20 border border-gray-500'
+                  ? 'bg-white/15 border border-white/40'
                   : 'bg-white/5 border border-transparent hover:bg-white/10'
-              } text-gray-400`}
+              } text-goat-mist`}
             >
               Match nul
             </button>

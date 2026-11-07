@@ -47,19 +47,19 @@ export function PlayerSearch({ onSelect, excluded = [], placeholder = 'Recherche
   return (
     <div ref={containerRef} className="relative">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-goat-mist-dim" />
         <input
           ref={inputRef}
           value={query}
           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
-          className="w-full bg-goat-dark border border-white/10 rounded-xl pl-10 pr-10 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-goat-orange transition-colors"
+          className="w-full bg-goat-navy-deep border border-white/10 rounded-xl pl-10 pr-10 py-3 text-white placeholder-goat-mist-dim focus:outline-none focus:border-goat-red transition-colors"
         />
         {query && (
           <button
             onClick={() => { setQuery(''); inputRef.current?.focus(); }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-goat-mist-dim hover:text-white"
           >
             <X className="w-4 h-4" />
           </button>
@@ -87,10 +87,10 @@ export function PlayerSearch({ onSelect, excluded = [], placeholder = 'Recherche
                     {player.prenom} {player.nom}
                   </p>
                   {player.surnom && (
-                    <p className="text-xs text-goat-orange truncate">{player.surnom}</p>
+                    <p className="text-xs text-goat-red-soft truncate">{player.surnom}</p>
                   )}
                 </div>
-                <span className="text-xs text-gray-500 flex-shrink-0">{player.categorie}</span>
+                <span className="text-xs text-goat-mist-dim flex-shrink-0">{player.categorie}</span>
               </button>
             ))}
           </motion.div>
@@ -100,7 +100,7 @@ export function PlayerSearch({ onSelect, excluded = [], placeholder = 'Recherche
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute z-50 w-full mt-2 glass rounded-xl px-4 py-3 text-gray-500 text-sm"
+            className="absolute z-50 w-full mt-2 glass rounded-xl px-4 py-3 text-goat-mist-dim text-sm"
           >
             Aucun joueur trouvé
           </motion.div>

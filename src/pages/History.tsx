@@ -13,9 +13,9 @@ export default function History() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-goat-black">
+    <div className="min-h-screen bg-goat-navy">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-goat-black/80 backdrop-blur-md border-b border-white/5">
+      <div className="sticky top-0 z-10 bg-goat-navy/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
           <button
             onClick={() => navigate('/')}
@@ -23,14 +23,14 @@ export default function History() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-black text-white flex-1">Historique</h1>
-          <span className="text-gray-500 text-sm">{matches.length} match{matches.length !== 1 ? 's' : ''}</span>
+          <h1 className="font-display text-3xl leading-none tracking-wide text-white flex-1">Historique</h1>
+          <span className="text-goat-mist-dim text-sm">{matches.length} match{matches.length !== 1 ? 's' : ''}</span>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
         {matches.length === 0 && (
-          <div className="text-center py-24 text-gray-600">
+          <div className="text-center py-24 text-goat-mist-dim">
             <Clock className="w-12 h-12 mx-auto mb-4 opacity-30" />
             <p className="text-lg font-semibold">Aucun match</p>
             <p className="text-sm mt-1">Les matchs joués apparaîtront ici</p>
@@ -51,10 +51,10 @@ export default function History() {
               {/* Date & time */}
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-goat-orange text-xs font-semibold tracking-wider uppercase">
+                  <span className="text-goat-red-soft text-xs font-semibold tracking-wider uppercase">
                     {formatDate(match.date)}
                   </span>
-                  <span className="text-gray-600 text-xs ml-2">{formatHour(match.date)}</span>
+                  <span className="text-goat-mist-dim text-xs ml-2">{formatHour(match.date)}</span>
                 </div>
                 <button
                   onClick={() => setDeleteId(match.id)}
@@ -81,14 +81,14 @@ export default function History() {
                 <div className="flex flex-col items-center gap-2">
                   <span className="text-2xl font-black text-gradient">VS</span>
                   {match.vainqueur ? (
-                    <div className="flex items-center gap-1 text-goat-orange">
+                    <div className="flex items-center gap-1 text-goat-red-soft">
                       <Trophy className="w-3 h-3" />
                       <span className="text-xs font-bold">
                         {match.vainqueur.prenom}
                       </span>
                     </div>
                   ) : (
-                    <span className="text-xs text-gray-600">Nul</span>
+                    <span className="text-xs text-goat-mist-dim">Nul</span>
                   )}
                 </div>
 
@@ -105,7 +105,7 @@ export default function History() {
               </div>
 
               {/* Match details */}
-              <div className="flex items-center gap-4 pt-2 border-t border-white/5 text-xs text-gray-500">
+              <div className="flex items-center gap-4 pt-2 border-t border-white/5 text-xs text-goat-mist-dim">
                 <div className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
                   <span>{formatTime(match.duree ?? 0)}</span>

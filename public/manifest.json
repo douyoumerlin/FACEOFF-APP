@@ -1,11 +1,11 @@
 {
-  "name": "GOAT225 Referee",
-  "short_name": "GOAT225",
-  "description": "Application arbitre pour les matchs GOAT225",
+  "name": "FaceOff by GOAT225",
+  "short_name": "FaceOff",
+  "description": "FaceOff by GOAT225 : l'application d'arbitrage des duels 1v1",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0B0B0B",
-  "theme_color": "#FF6A00",
+  "background_color": "#12274A",
+  "theme_color": "#12274A",
   "orientation": "portrait-primary",
   "icons": [
     {
