@@ -4,12 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Trash2, Trophy, Clock, Flag } from 'lucide-react';
 import { useMatchStore } from '../store/matchStore';
 import { PlayerAvatar } from '../components/PlayerAvatar';
+import { useLivePlayersMap } from '../hooks/useLivePlayer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { formatDate, formatHour, formatTime } from '../lib/utils';
 
 export default function History() {
   const navigate = useNavigate();
   const { matches, deleteMatch } = useMatchStore();
+  const live = useLivePlayersMap();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   return (
@@ -70,7 +72,7 @@ export default function History() {
                 <div className={`flex-1 flex flex-col items-center gap-2 ${
                   match.vainqueur?.id === match.joueur1.id ? '' : 'opacity-60'
                 }`}>
-                  <PlayerAvatar player={match.joueur1} size="md" />
+                  <PlayerAvatar player={live.get(match.joueur1.id) ?? match.joueur1} size="md" />
                   <p className="font-bold text-white text-sm text-center leading-tight">
                     {match.joueur1.prenom} {match.joueur1.nom}
                   </p>
@@ -96,7 +98,7 @@ export default function History() {
                 <div className={`flex-1 flex flex-col items-center gap-2 ${
                   match.vainqueur?.id === match.joueur2.id ? '' : 'opacity-60'
                 }`}>
-                  <PlayerAvatar player={match.joueur2} size="md" />
+                  <PlayerAvatar player={live.get(match.joueur2.id) ?? match.joueur2} size="md" />
                   <p className="font-bold text-white text-sm text-center leading-tight">
                     {match.joueur2.prenom} {match.joueur2.nom}
                   </p>

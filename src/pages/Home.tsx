@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { ArrowUpRight, Clock, Settings, Users } from 'lucide-react';
+import { ArrowUpRight, ChevronRight, Clock, Settings, Trophy, Users } from 'lucide-react';
 import { useMatchStore } from '../store/matchStore';
 import { usePlayersStore } from '../store/playersStore';
+import { useTournamentStore } from '../store/tournamentStore';
+import { useLivePlayer } from '../hooks/useLivePlayer';
+import { FORMATS, progressLabel } from '../lib/tournament';
 import { PlayerAvatar } from '../components/PlayerAvatar';
 import { formatDate } from '../lib/utils';
 import logoFondSombre from '../assets/brand/logo-fond-sombre.png';
@@ -25,6 +28,10 @@ export default function Home() {
   const matches = useMatchStore((s) => s.matches);
   const playersCount = usePlayersStore((s) => s.players.length);
   const lastMatch = matches[0];
+  const last1 = useLivePlayer(lastMatch?.joueur1);
+  const last2 = useLivePlayer(lastMatch?.joueur2);
+  const tournaments = useTournamentStore((s) => s.tournaments);
+  const tournoiEnCours = tournaments.find((t) => !t.championId);
 
   return (
     <div className="min-h-screen bg-goat-navy grain flex flex-col">
@@ -96,7 +103,7 @@ export default function Home() {
             {lastMatch ? (
               <span className="flex items-center justify-between w-full gap-2">
                 <span className="flex items-center gap-2.5 min-w-0">
-                  <PlayerAvatar player={lastMatch.joueur1} size="sm" />
+                  <PlayerAvatar player={last1 ?? lastMatch.joueur1} size="sm" />
                   <span className="font-bold text-sm truncate">{lastMatch.joueur1.prenom}</span>
                 </span>
                 <span className="font-display text-[34px] leading-none tabular-nums flex-shrink-0">
@@ -106,7 +113,7 @@ export default function Home() {
                 </span>
                 <span className="flex items-center gap-2.5 min-w-0 justify-end">
                   <span className="font-semibold text-sm text-goat-mist truncate">{lastMatch.joueur2.prenom}</span>
-                  <PlayerAvatar player={lastMatch.joueur2} size="sm" />
+                  <PlayerAvatar player={last2 ?? lastMatch.joueur2} size="sm" />
                 </span>
               </span>
             ) : (
@@ -131,6 +138,27 @@ export default function Home() {
             <span className="flex flex-col gap-0.5">
               <span className="font-display text-[38px] leading-none tabular-nums">{matches.length}</span>
               <span className="text-sm font-semibold text-goat-mist">Matchs joués</span>
+            </span>
+          </button>
+
+          <button
+            onClick={() => navigate(tournoiEnCours ? `/tournois/${tournoiEnCours.id}` : '/tournois')}
+            className={`${tile} col-span-2 md:col-span-4 p-[18px] flex items-center gap-4 relative overflow-hidden`}
+          >
+            <span className="w-12 h-12 rounded-xl bg-goat-red flex items-center justify-center flex-shrink-0">
+              <Trophy className="w-6 h-6" />
+            </span>
+            <span className="relative flex-1 min-w-0">
+              <span className="block font-display text-[32px] leading-none">Tournoi</span>
+              <span className="block text-sm text-goat-mist truncate mt-1">
+                {tournoiEnCours
+                  ? `${tournoiEnCours.nom} · ${progressLabel(tournoiEnCours)}`
+                  : `${Object.keys(FORMATS).length} formats : élimination, poules, championnat`}
+              </span>
+            </span>
+            <span className="relative text-xs font-extrabold tracking-[0.14em] flex items-center gap-1 flex-shrink-0">
+              {tournoiEnCours ? 'CONTINUER' : 'CRÉER'}
+              <ChevronRight className="w-4 h-4" />
             </span>
           </button>
         </motion.div>

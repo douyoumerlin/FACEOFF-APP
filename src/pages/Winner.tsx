@@ -1,9 +1,11 @@
 import { useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, RotateCcw } from 'lucide-react';
+import { Home, RotateCcw, Trophy } from 'lucide-react';
 import { useMatchStore } from '../store/matchStore';
 import { useSettingsStore } from '../store/settingsStore';
+import { useTournamentStore } from '../store/tournamentStore';
+import { useLivePlayer } from '../hooks/useLivePlayer';
 import { Player } from '../types';
 import { formatTime } from '../lib/utils';
 
@@ -90,14 +92,18 @@ export default function Winner() {
   const setCurrentMatch = useMatchStore((s) => s.setCurrentMatch);
   const animationsEnabled = useSettingsStore((s) => s.animationsEnabled);
 
-  const winner = match?.vainqueur ?? currentMatch?.vainqueur ?? null;
+  // L'historique ne garde pas les photos : on retrouve la fiche à jour de chaque joueur.
+  const winner = useLivePlayer(match?.vainqueur ?? currentMatch?.vainqueur ?? null);
   const score1 = match?.score1 ?? currentMatch?.score1 ?? 0;
   const score2 = match?.score2 ?? currentMatch?.score2 ?? 0;
   const faute1 = match?.faute1 ?? currentMatch?.faute1 ?? 0;
   const faute2 = match?.faute2 ?? currentMatch?.faute2 ?? 0;
   const duree = match?.duree ?? currentMatch?.duree ?? 0;
-  const j1 = match?.joueur1 ?? currentMatch?.joueur1;
-  const j2 = match?.joueur2 ?? currentMatch?.joueur2;
+  const j1 = useLivePlayer(match?.joueur1 ?? currentMatch?.joueur1);
+  const j2 = useLivePlayer(match?.joueur2 ?? currentMatch?.joueur2);
+  const tournoi = match?.tournoi ?? currentMatch?.tournoi;
+  const tournament = useTournamentStore((s) => (tournoi ? s.tournaments.find((t) => t.id === tournoi.tournamentId) : undefined));
+  const champion = !!winner && tournament?.championId === winner.id;
 
   useEffect(() => {
     if (!j1 || !j2) navigate('/');
@@ -157,9 +163,18 @@ export default function Winner() {
               winner ? 'bg-goat-red text-white' : 'bg-white text-goat-navy'
             }`}
           >
-            {winner ? 'Vainqueur' : 'Égalité'}
+            {champion ? 'Champion' : winner ? 'Vainqueur' : 'Égalité'}
           </span>
         </div>
+        {tournoi && (
+          <p className="mt-3 inline-flex items-center gap-2 self-start max-w-full px-3 py-1.5 rounded-full bg-white/10 text-xs font-bold tracking-wide">
+            <Trophy className="w-3.5 h-3.5 text-goat-red-soft flex-shrink-0" />
+            <span className="truncate">
+              {tournament?.nom ?? 'Tournoi'} · {tournoi.label}
+              {champion ? ' · remporte le tournoi !' : ''}
+            </span>
+          </p>
+        )}
 
         <div className="mt-auto md:mt-10 flex flex-col gap-4">
           {winner ? (
@@ -202,6 +217,26 @@ export default function Winner() {
           )}
 
           {/* Actions */}
+          {tournoi ? (
+            <div className="flex flex-col md:flex-row gap-2.5 md:gap-3 mt-1 md:mt-4">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate(`/tournois/${tournoi.tournamentId}`)}
+                className="h-14 md:h-[60px] md:flex-[1.6] rounded-2xl bg-goat-red text-white font-display text-[26px] md:text-[24px] tracking-wider whitespace-nowrap px-4 flex items-center justify-center gap-2.5 hover:bg-goat-red-light transition-colors"
+              >
+                <Trophy className="w-5 h-5" strokeWidth={2.5} />
+                {champion ? 'Voir le tableau final' : 'Retour au tableau'}
+              </motion.button>
+              <button
+                onClick={() => navigate('/')}
+                className="h-[50px] md:h-[60px] md:flex-1 rounded-[14px] md:rounded-2xl border border-white/30 text-white font-bold flex items-center justify-center gap-2 px-3 hover:bg-white/10 transition-colors"
+              >
+                <Home className="w-[18px] h-[18px]" />
+                Accueil
+              </button>
+            </div>
+          ) : (
           <div className="flex flex-col md:flex-row gap-2.5 md:gap-3 mt-1 md:mt-4">
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -228,6 +263,7 @@ export default function Winner() {
               </button>
             </div>
           </div>
+          )}
         </div>
       </motion.div>
     </div>

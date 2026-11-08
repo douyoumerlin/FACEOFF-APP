@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Play, Pause, RotateCcw, Flag, Minus, Plus } from 'lucide-react';
+import { Play, Pause, RotateCcw, Flag, Minus, Plus, Trophy } from 'lucide-react';
 import { useMatchStore } from '../store/matchStore';
 import { useSettingsStore } from '../store/settingsStore';
+import { useTournamentStore } from '../store/tournamentStore';
 import { PlayerAvatar } from '../components/PlayerAvatar';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Player } from '../types';
@@ -139,6 +140,10 @@ export default function FaceOff() {
   const navigate = useNavigate();
   const { currentMatch, setCurrentMatch, saveMatch } = useMatchStore();
   useSettingsStore((s) => s.animationsEnabled);
+  const tournoi = currentMatch?.tournoi;
+  const tournament = useTournamentStore((s) => (tournoi ? s.tournaments.find((t) => t.id === tournoi.tournamentId) : undefined));
+  const recordResult = useTournamentStore((s) => s.recordResult);
+  const knockout = !!tournoi?.knockout;
 
   const [timeLeft, setTimeLeft] = useState(currentMatch?.temps ?? 300);
   const [running, setRunning] = useState(false);
@@ -244,7 +249,21 @@ export default function FaceOff() {
       vainqueur: selectedWinner,
       date: currentMatch.date ?? new Date().toISOString(),
       duree,
+      tournoi,
     });
+    // Match de tournoi : on enregistre le résultat, le tableau avance tout seul.
+    // (Une seule fois : si le match est déjà joué, on ne réécrit pas le tableau.)
+    if (tournoi && tournament) {
+      const tMatch = tournament.matches.find((m) => m.id === tournoi.tMatchId);
+      if (tMatch && !tMatch.played) {
+        recordResult(tournoi.tournamentId, tournoi.tMatchId, {
+          winner: selectedWinner?.id ?? null,
+          score1,
+          score2,
+          matchId: savedMatch.id,
+        });
+      }
+    }
     setCurrentMatch({
       ...currentMatch,
       score1,
@@ -271,6 +290,14 @@ export default function FaceOff() {
 
   return (
     <div className="min-h-screen bg-goat-navy grain flex flex-col select-none">
+      {tournoi && (
+        <div className="flex justify-center px-4 pt-4 -mb-2">
+          <span className="inline-flex items-center gap-2 max-w-full px-3 py-1.5 rounded-full bg-white/10 text-xs font-bold tracking-wide">
+            <Trophy className="w-3.5 h-3.5 text-goat-red-soft flex-shrink-0" />
+            <span className="truncate">{tournament?.nom ?? 'Tournoi'} · {tournoi.label}</span>
+          </span>
+        </div>
+      )}
       {/* Chrono */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 px-4 pt-6 pb-5">
         <div className="flex items-center gap-3 px-6 py-2 rounded-full bg-goat-navy-deep border border-white/20">
@@ -372,9 +399,12 @@ export default function FaceOff() {
         cancelLabel="Continuer"
         onConfirm={confirmEnd}
         onCancel={() => setShowEnd(false)}
+        confirmDisabled={knockout && !selectedWinner}
       >
         <div className="space-y-3 my-4">
-          <p className="text-sm text-goat-mist mb-3">Sélectionne le vainqueur :</p>
+          <p className="text-sm text-goat-mist mb-3">
+            {knockout ? 'Match à élimination : choisis qui passe au tour suivant.' : 'Sélectionne le vainqueur :'}
+          </p>
           {[j1, j2].map((p, i) => (
             <button
               key={p.id}
@@ -395,7 +425,7 @@ export default function FaceOff() {
               )}
             </button>
           ))}
-          {score1 === score2 && (
+          {score1 === score2 && !knockout && (
             <button
               onClick={() => setSelectedWinner(null)}
               className={`w-full p-3 rounded-xl text-sm transition-colors ${
