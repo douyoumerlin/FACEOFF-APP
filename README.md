@@ -36,6 +36,15 @@ npm run tauri build
 
 Les installateurs sont générés dans `src-tauri/target/release/bundle/nsis/` et `src-tauri/target/release/bundle/msi/`.
 
+### Mode Tournoi
+
+Depuis la tuile **Tournoi** de l'accueil : choisis un format, coche les joueurs, lance.
+Le tableau se met à jour tout seul après chaque match joué sur l'écran FaceOff.
+
+- **A · Élimination directe** : arbre jusqu'à la finale (2 à 32 joueurs, exempts répartis automatiquement).
+- **B · Poules + phase finale** : 1 poule (4-5 joueurs) ou 2 poules (6 à 16), les 2 premiers en phase finale.
+- **C · Championnat** : tous contre tous, victoire 3 pts, nul 1 pt.
+
 ### Raccourcis clavier pendant un match
 
 - `←` : un point pour le joueur 1

@@ -11,6 +11,7 @@ interface ConfirmDialogProps {
   onCancel: () => void;
   children?: React.ReactNode;
   destructive?: boolean;
+  confirmDisabled?: boolean;
 }
 
 export function ConfirmDialog({
@@ -23,6 +24,7 @@ export function ConfirmDialog({
   onCancel,
   children,
   destructive = false,
+  confirmDisabled = false,
 }: ConfirmDialogProps) {
   return (
     <AnimatePresence>
@@ -67,7 +69,8 @@ export function ConfirmDialog({
               </button>
               <button
                 onClick={onConfirm}
-                className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${
+                disabled={confirmDisabled}
+                className={`flex-1 py-3 rounded-xl font-semibold transition-colors disabled:opacity-40 ${
                   destructive
                     ? 'bg-goat-red hover:bg-goat-red-light text-white'
                     : 'bg-goat-red hover:bg-goat-red-light text-white'

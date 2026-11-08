@@ -9,6 +9,9 @@ const FaceOff = lazy(() => import('./pages/FaceOff'));
 const Winner = lazy(() => import('./pages/Winner'));
 const History = lazy(() => import('./pages/History'));
 const Settings = lazy(() => import('./pages/Settings'));
+const Tournaments = lazy(() => import('./pages/Tournaments'));
+const TournamentNew = lazy(() => import('./pages/TournamentNew'));
+const TournamentView = lazy(() => import('./pages/TournamentView'));
 
 function Loader() {
   return (
@@ -30,6 +33,9 @@ export default function App() {
           <Route path="/winner" element={<Winner />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/tournois" element={<Tournaments />} />
+          <Route path="/tournois/nouveau" element={<TournamentNew />} />
+          <Route path="/tournois/:id" element={<TournamentView />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

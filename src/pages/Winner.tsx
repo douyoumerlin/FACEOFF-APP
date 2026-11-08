@@ -1,12 +1,13 @@
 import { useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, RotateCcw } from 'lucide-react';
+import { Home, RotateCcw, Trophy } from 'lucide-react';
 import { useMatchStore } from '../store/matchStore';
 import { useSettingsStore } from '../store/settingsStore';
-import { PlayerAvatar } from '../components/PlayerAvatar';
+import { useTournamentStore } from '../store/tournamentStore';
+import { useLivePlayer } from '../hooks/useLivePlayer';
+import { Player } from '../types';
 import { formatTime } from '../lib/utils';
-import logoFondSombre from '../assets/brand/logo-fond-sombre.png';
 
 const CONFETTI_COLORS = ['#E01B1B', '#FFFFFF', '#E01B1B', '#8EA0BF'];
 
@@ -25,7 +26,7 @@ function Confetti({ count = 40 }: { count?: number }) {
     [count]
   );
   return (
-    <div aria-hidden className="fixed inset-0 pointer-events-none overflow-hidden">
+    <div aria-hidden className="fixed inset-0 z-20 pointer-events-none overflow-hidden">
       {pieces.map((p, i) => (
         <span
           key={i}
@@ -37,13 +38,11 @@ function Confetti({ count = 40 }: { count?: number }) {
   );
 }
 
-function Crown() {
+function Crown({ className = '' }: { className?: string }) {
   return (
     <svg
       aria-hidden
-      className="crown-float relative z-10 -mb-2.5"
-      width="56"
-      height="44"
+      className={className}
       viewBox="0 0 24 20"
       fill="#E01B1B"
       stroke="#FFFFFF"
@@ -55,12 +54,31 @@ function Crown() {
   );
 }
 
+/** Photo du joueur en plein cadre, ou ses initiales en filigrane s'il n'en a pas. */
+function PlayerPhoto({ player, className = '' }: { player: Player; className?: string }) {
+  const initials = `${player.prenom[0] ?? ''}${player.nom[0] ?? ''}`.toUpperCase();
+  return (
+    <div className={`overflow-hidden bg-goat-navy-light ${className}`}>
+      {player.photo ? (
+        <img src={player.photo} alt="" className="w-full h-full object-cover object-top" />
+      ) : (
+        <div
+          aria-hidden
+          className="w-full h-full flex items-center justify-center font-display text-[min(55vw,360px)] leading-none text-white/10 select-none"
+        >
+          {initials}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Stat({ value, label }: { value: string; label: string }) {
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="font-display text-3xl leading-none tabular-nums">{value}</span>
-      <span className="text-xs font-medium text-goat-mist">{label}</span>
-    </div>
+    <span className="flex flex-col items-center">
+      <span className="font-display text-2xl md:text-[32px] leading-none tabular-nums">{value}</span>
+      <span className="text-[11px] md:text-xs text-goat-mist">{label}</span>
+    </span>
   );
 }
 
@@ -74,14 +92,18 @@ export default function Winner() {
   const setCurrentMatch = useMatchStore((s) => s.setCurrentMatch);
   const animationsEnabled = useSettingsStore((s) => s.animationsEnabled);
 
-  const winner = match?.vainqueur ?? currentMatch?.vainqueur ?? null;
+  // L'historique ne garde pas les photos : on retrouve la fiche à jour de chaque joueur.
+  const winner = useLivePlayer(match?.vainqueur ?? currentMatch?.vainqueur ?? null);
   const score1 = match?.score1 ?? currentMatch?.score1 ?? 0;
   const score2 = match?.score2 ?? currentMatch?.score2 ?? 0;
   const faute1 = match?.faute1 ?? currentMatch?.faute1 ?? 0;
   const faute2 = match?.faute2 ?? currentMatch?.faute2 ?? 0;
   const duree = match?.duree ?? currentMatch?.duree ?? 0;
-  const j1 = match?.joueur1 ?? currentMatch?.joueur1;
-  const j2 = match?.joueur2 ?? currentMatch?.joueur2;
+  const j1 = useLivePlayer(match?.joueur1 ?? currentMatch?.joueur1);
+  const j2 = useLivePlayer(match?.joueur2 ?? currentMatch?.joueur2);
+  const tournoi = match?.tournoi ?? currentMatch?.tournoi;
+  const tournament = useTournamentStore((s) => (tournoi ? s.tournaments.find((t) => t.id === tournoi.tournamentId) : undefined));
+  const champion = !!winner && tournament?.championId === winner.id;
 
   useEffect(() => {
     if (!j1 || !j2) navigate('/');
@@ -101,120 +123,148 @@ export default function Winner() {
   }
 
   const winnerIsJ1 = winner?.id === j1.id;
+  const loser = winner ? (winnerIsJ1 ? j2 : j1) : null;
+  const winScore = winnerIsJ1 ? score1 : score2;
+  const loseScore = winnerIsJ1 ? score2 : score1;
+  const winFautes = winnerIsJ1 ? faute1 : faute2;
+  const loseFautes = winnerIsJ1 ? faute2 : faute1;
 
   return (
-    <div className="min-h-screen bg-goat-navy grain relative overflow-hidden flex flex-col items-center px-5 pt-14 pb-8">
+    <div className="min-h-screen bg-goat-navy relative overflow-hidden flex flex-col md:flex-row">
       {animationsEnabled && winner && <Confetti />}
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-        className="relative z-10 w-full max-w-md flex flex-col items-center gap-5 text-center flex-1"
-      >
-        <img src={logoFondSombre} alt="Logo GOAT225" className="w-12 h-12 object-contain" />
-
+      {/* Photo : haut de l'écran sur téléphone, moitié gauche sur grand écran */}
+      <div className="absolute inset-x-0 top-0 h-[66vh] md:inset-y-0 md:right-auto md:h-auto md:w-[53%]">
         {winner ? (
-          <>
-            <p className="font-display text-[22px] tracking-[0.3em] bg-goat-red text-white px-3.5 pt-1 pb-0.5 rounded-md">
-              Vainqueur
-            </p>
-
-            <motion.div
-              initial={{ scale: 0, rotate: -10 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: 'spring', stiffness: 250, damping: 20, delay: 0.2 }}
-              className="flex flex-col items-center"
-            >
-              <Crown />
-              <PlayerAvatar
-                player={winner}
-                size="xl"
-                className="w-36 h-36 text-5xl border-4 border-goat-red ring-pulse"
-              />
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-              <h1 className="font-display text-6xl leading-[0.9]">
-                {winner.prenom} {winner.nom}
-              </h1>
-              <p className="text-sm font-semibold text-goat-mist mt-2">
-                {winner.surnom ? `« ${winner.surnom} » · ` : ''}{winner.categorie}
-              </p>
-            </motion.div>
-          </>
+          <PlayerPhoto player={winner} className="w-full h-full" />
         ) : (
-          <>
-            <p className="font-display text-[22px] tracking-[0.3em] bg-white text-goat-navy px-3.5 pt-1 pb-0.5 rounded-md">
-              Égalité
-            </p>
-            <h1 className="font-display text-7xl leading-[0.9] mt-4">Match nul</h1>
-            <p className="text-sm font-semibold text-goat-mist">Personne ne lâche rien. Revanche ?</p>
-          </>
+          <div className="w-full h-full flex">
+            <PlayerPhoto player={j1} className="flex-1 h-full" />
+            <div className="w-1.5 bg-white" />
+            <PlayerPhoto player={j2} className="flex-1 h-full" />
+          </div>
+        )}
+      </div>
+      <div aria-hidden className="absolute inset-0 winner-veil" />
+
+      {/* Contenu */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 24 }}
+        className="relative z-10 w-full min-h-screen flex flex-col px-5 pt-12 pb-7 md:ml-auto md:w-[47%] md:max-w-[620px] md:min-h-0 md:h-screen md:justify-center md:pr-16 md:pl-4 md:py-12"
+      >
+        <div className="flex items-center justify-between">
+          <span className="font-display text-[22px] md:text-[26px] tracking-wide">
+            FACE<span className="text-goat-red">OFF</span>
+          </span>
+          <span
+            className={`font-display text-xl md:text-[22px] tracking-[0.3em] px-3 pt-1 pb-0.5 rounded-md ${
+              winner ? 'bg-goat-red text-white' : 'bg-white text-goat-navy'
+            }`}
+          >
+            {champion ? 'Champion' : winner ? 'Vainqueur' : 'Égalité'}
+          </span>
+        </div>
+        {tournoi && (
+          <p className="mt-3 inline-flex items-center gap-2 self-start max-w-full px-3 py-1.5 rounded-full bg-white/10 text-xs font-bold tracking-wide">
+            <Trophy className="w-3.5 h-3.5 text-goat-red-soft flex-shrink-0" />
+            <span className="truncate">
+              {tournament?.nom ?? 'Tournoi'} · {tournoi.label}
+              {champion ? ' · remporte le tournoi !' : ''}
+            </span>
+          </p>
         )}
 
-        {/* Récapitulatif */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="w-full rounded-[22px] border border-white/15 bg-goat-navy-light p-5 flex flex-col gap-4"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-1 text-left">
-              <span className="text-[13px] font-semibold text-goat-mist truncate max-w-[110px]">{j1.prenom}</span>
-              <span className={`font-display text-6xl leading-[0.9] tabular-nums ${winner && !winnerIsJ1 ? 'text-goat-mist-dim' : 'text-white'}`}>
-                {score1}
-              </span>
-            </div>
-            <span className="text-xs font-extrabold tracking-[0.2em] bg-goat-red text-white px-2.5 py-1 rounded-md">FINAL</span>
-            <div className="flex flex-col gap-1 items-end">
-              <span className="text-[13px] font-semibold text-goat-mist truncate max-w-[110px]">{j2.prenom}</span>
-              <span className={`font-display text-6xl leading-[0.9] tabular-nums ${winner && winnerIsJ1 ? 'text-goat-mist-dim' : 'text-white'}`}>
-                {score2}
-              </span>
-            </div>
-          </div>
-          <div className="h-px bg-white/10" />
-          <div className="grid grid-cols-3 gap-2">
-            <Stat value={formatTime(duree)} label="Durée" />
-            <Stat value={`+${Math.abs(score1 - score2)}`} label="Écart" />
-            <Stat value={`${faute1} – ${faute2}`} label="Fautes" />
-          </div>
-        </motion.div>
+        <div className="mt-auto md:mt-10 flex flex-col gap-4">
+          {winner ? (
+            <>
+              <div className="flex items-end gap-3">
+                <Crown className="crown-float w-12 h-10 md:w-16 md:h-12 flex-shrink-0 mb-2 md:mb-4" />
+                <h1 className="font-display text-[clamp(3.5rem,18vw,4.75rem)] md:text-[112px] leading-[0.85] break-words">
+                  {winner.prenom} {winner.nom}
+                </h1>
+              </div>
+              <p className="-mt-1 text-[13px] md:text-[15px] font-bold tracking-[0.14em] uppercase text-goat-mist">
+                {winner.surnom ? `« ${winner.surnom} » · ` : ''}{winner.categorie}
+                <span className="hidden md:inline normal-case tracking-normal"> · contre {loser!.prenom} {loser!.nom}</span>
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="font-display text-7xl md:text-[112px] leading-[0.85]">Match nul</h1>
+              <p className="-mt-1 text-sm font-semibold text-goat-mist">
+                {j1.prenom} et {j2.prenom} ne lâchent rien. Revanche ?
+              </p>
+            </>
+          )}
 
-        {/* Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="w-full flex flex-col gap-2.5 mt-auto pt-4"
-        >
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={revanche}
-            className="h-14 rounded-2xl bg-goat-red text-white font-display text-[26px] tracking-wider flex items-center justify-center gap-2.5 hover:bg-goat-red-light transition-colors"
-          >
-            <RotateCcw className="w-5 h-5" strokeWidth={2.5} />
-            Prends ta revanche
-          </motion.button>
-          <div className="flex gap-2.5">
-            <button
-              onClick={() => navigate('/new-match')}
-              className="flex-1 h-[52px] rounded-[14px] bg-white text-goat-navy font-bold flex items-center justify-center gap-2 hover:bg-goat-mist transition-colors"
-            >
-              Nouveau match
-            </button>
-            <button
-              onClick={() => navigate('/')}
-              className="flex-1 h-[52px] rounded-[14px] border border-white/30 text-white font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors"
-            >
-              <Home className="w-[18px] h-[18px]" />
-              Accueil
-            </button>
+          {/* Score et statistiques */}
+          <div className="rounded-[20px] md:rounded-[22px] bg-goat-navy-light border border-white/15 px-[18px] py-4 md:px-6 md:py-5 flex items-center justify-between gap-4">
+            <span className="font-display text-[54px] md:text-[80px] leading-[0.85] tabular-nums whitespace-nowrap">
+              {winner ? winScore : score1}
+              <span className="text-goat-mist-dim"> – {winner ? loseScore : score2}</span>
+            </span>
+            <span className="flex gap-4 md:gap-6">
+              <Stat value={formatTime(duree)} label="Durée" />
+              <Stat value={`${winner ? winFautes : faute1} – ${winner ? loseFautes : faute2}`} label="Fautes" />
+            </span>
           </div>
-        </motion.div>
+          {winner && (
+            <p className="-mt-2 text-xs text-goat-mist md:hidden">
+              contre <strong className="text-white">{loser!.prenom} {loser!.nom}</strong>
+            </p>
+          )}
+
+          {/* Actions */}
+          {tournoi ? (
+            <div className="flex flex-col md:flex-row gap-2.5 md:gap-3 mt-1 md:mt-4">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate(`/tournois/${tournoi.tournamentId}`)}
+                className="h-14 md:h-[60px] md:flex-[1.6] rounded-2xl bg-goat-red text-white font-display text-[26px] md:text-[24px] tracking-wider whitespace-nowrap px-4 flex items-center justify-center gap-2.5 hover:bg-goat-red-light transition-colors"
+              >
+                <Trophy className="w-5 h-5" strokeWidth={2.5} />
+                {champion ? 'Voir le tableau final' : 'Retour au tableau'}
+              </motion.button>
+              <button
+                onClick={() => navigate('/')}
+                className="h-[50px] md:h-[60px] md:flex-1 rounded-[14px] md:rounded-2xl border border-white/30 text-white font-bold flex items-center justify-center gap-2 px-3 hover:bg-white/10 transition-colors"
+              >
+                <Home className="w-[18px] h-[18px]" />
+                Accueil
+              </button>
+            </div>
+          ) : (
+          <div className="flex flex-col md:flex-row gap-2.5 md:gap-3 mt-1 md:mt-4">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={revanche}
+              className="h-14 md:h-[60px] md:flex-[1.5] md:min-w-0 rounded-2xl bg-goat-red text-white font-display text-[26px] md:text-[24px] tracking-wider whitespace-nowrap px-4 flex items-center justify-center gap-2.5 hover:bg-goat-red-light transition-colors"
+            >
+              <RotateCcw className="w-5 h-5 md:hidden lg:block" strokeWidth={2.5} />
+              Prends ta revanche
+            </motion.button>
+            <div className="flex gap-2.5 md:contents">
+              <button
+                onClick={() => navigate('/new-match')}
+                className="flex-1 min-w-0 h-[50px] md:h-[60px] rounded-[14px] md:rounded-2xl bg-white text-goat-navy font-bold whitespace-nowrap px-3 md:text-sm hover:bg-goat-mist transition-colors"
+              >
+                Nouveau match
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="flex-1 min-w-0 md:flex-[0.8] h-[50px] md:h-[60px] rounded-[14px] md:rounded-2xl border border-white/30 text-white font-bold flex items-center justify-center gap-2 px-3 hover:bg-white/10 transition-colors"
+              >
+                <Home className="w-[18px] h-[18px]" />
+                Accueil
+              </button>
+            </div>
+          </div>
+          )}
+        </div>
       </motion.div>
     </div>
   );
