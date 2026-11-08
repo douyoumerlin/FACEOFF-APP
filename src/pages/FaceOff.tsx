@@ -64,43 +64,56 @@ function PlayerPanel({ player, side, score, faute, animate, onScore, onFaute }: 
 }) {
   const isRed = side === 'red';
   const name = `${player.prenom} ${player.nom}`;
+  const initials = `${player.prenom[0] ?? ''}${player.nom[0] ?? ''}`.toUpperCase();
+  // J1 : contenu à gauche sur téléphone, collé au VS (à droite) sur grand écran.
+  // J2 : l'inverse. La photo occupe le côté opposé au texte.
+  const align = isRed
+    ? 'items-start text-left md:items-end md:text-right md:pr-16'
+    : 'items-end text-right md:items-start md:text-left md:pl-16';
+
   return (
     <div
-      className={`flex-1 flex flex-col items-center justify-center gap-4 p-5 sm:p-8 ${
-        isRed ? 'bg-goat-red pb-14 md:pb-8' : 'bg-goat-navy-light pt-14 md:pt-8'
-      }`}
+      className={`relative flex-1 min-h-[320px] overflow-hidden ${isRed ? 'bg-goat-red' : 'bg-goat-navy-light'}`}
     >
-      <div className="flex items-center gap-3">
-        <PlayerAvatar player={player} size="md" className="ring-2 ring-white" />
-        <div className="min-w-0">
-          <p className="font-display text-3xl leading-none truncate">{name}</p>
-          <p className="text-xs font-bold tracking-[0.14em] uppercase mt-1 text-white/85">
+      {/* Photo plein cadre (ou initiales en filigrane sans photo) */}
+      <div className={`absolute inset-y-0 ${isRed ? 'faceoff-photo-j1' : 'faceoff-photo-j2'}`}>
+        {player.photo ? (
+          <img src={player.photo} alt="" className="w-full h-full object-cover object-top" />
+        ) : (
+          <div aria-hidden className="w-full h-full flex items-center justify-center font-display text-[min(40vw,320px)] leading-none text-white/15 select-none">
+            {initials}
+          </div>
+        )}
+      </div>
+      <div aria-hidden className={`absolute inset-0 ${isRed ? 'faceoff-veil-j1' : 'faceoff-veil-j2'}`} />
+
+      {/* Nom, score, commandes */}
+      <div className={`relative h-full flex flex-col justify-center gap-3 p-5 sm:p-8 ${align} ${isRed ? 'pb-14 md:pb-8' : 'pt-14 md:pt-8'}`}>
+        <div>
+          <p className="font-display text-[34px] md:text-5xl leading-[0.9] drop-shadow">{name}</p>
+          <p className={`text-[11px] md:text-[13px] font-extrabold tracking-[0.14em] uppercase mt-1 ${isRed ? 'text-white' : 'text-goat-mist'}`}>
             {player.surnom ? `« ${player.surnom} » · ` : ''}{player.categorie}
           </p>
         </div>
-      </div>
 
-      <ScoreDisplay score={score} animate={animate} flashColor={isRed ? '#12274A' : '#FF6B6B'} />
+        <ScoreDisplay score={score} animate={animate} flashColor={isRed ? '#12274A' : '#FF6B6B'} />
 
-      <div className="flex gap-2">
-        <ScoreButton side={side} variant="minus" label={`Retirer un point à ${name}`} onClick={() => onScore(-1)}>
-          <Minus className="w-5 h-5" />
-        </ScoreButton>
-        <ScoreButton side={side} label={`Un point pour ${name}`} onClick={() => onScore(1)}>+1</ScoreButton>
-        <ScoreButton side={side} label={`Deux points pour ${name}`} onClick={() => onScore(2)}>+2</ScoreButton>
-      </div>
+        <div className={`flex flex-wrap gap-2 items-center ${isRed ? 'md:flex-row-reverse' : ''}`}>
+          <ScoreButton side={side} label={`Un point pour ${name}`} onClick={() => onScore(1)}>+1</ScoreButton>
+          <ScoreButton side={side} label={`Deux points pour ${name}`} onClick={() => onScore(2)}>+2</ScoreButton>
+          <ScoreButton side={side} variant="minus" label={`Retirer un point à ${name}`} onClick={() => onScore(-1)}>
+            <Minus className="w-5 h-5" />
+          </ScoreButton>
+        </div>
 
-      <div
-        className={`w-full max-w-xs rounded-xl px-3 py-2.5 flex items-center justify-between ${
-          isRed ? 'bg-goat-navy/25' : 'bg-white/10'
-        }`}
-      >
-        <div className="flex items-center gap-2">
+        <div
+          className={`rounded-xl pl-3 pr-1.5 py-1.5 flex items-center gap-3 backdrop-blur-sm ${
+            isRed ? 'bg-goat-navy/35' : 'bg-white/15'
+          }`}
+        >
           <Flag className="w-4 h-4" />
           <span className="text-xs font-bold tracking-wider">FAUTES</span>
           <span className="font-display text-2xl leading-none tabular-nums">{faute}</span>
-        </div>
-        <div className="flex gap-2">
           <button
             onClick={() => onFaute(-1)}
             aria-label={`Retirer une faute à ${name}`}
