@@ -26,7 +26,7 @@ function Confetti({ count = 40 }: { count?: number }) {
     [count]
   );
   return (
-    <div aria-hidden className="fixed inset-0 z-20 pointer-events-none overflow-hidden">
+    <div aria-hidden className="fixed inset-0 z-[5] pointer-events-none overflow-hidden">
       {pieces.map((p, i) => (
         <span
           key={i}
