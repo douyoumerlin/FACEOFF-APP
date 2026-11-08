@@ -162,3 +162,25 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .confetti, .crown-float, .ring-pulse, .timer-orange, .timer-red { animation: none; }
 }
+
+/* Écran FaceOff « Affiche » : photo plein cadre + voile aux couleurs du joueur.
+   Téléphone (joueurs l'un sous l'autre) : photo J1 à droite, J2 à gauche.
+   Grand écran (côte à côte, version Windows « Arène ») : photos aux extrémités. */
+.faceoff-photo-j1 { right: 0; width: 62%; }
+.faceoff-photo-j2 { left: 0; width: 62%; }
+.faceoff-veil-j1 {
+  background: linear-gradient(90deg, #E01B1B 0%, #E01B1B 34%, rgba(224, 27, 27, 0.6) 55%, rgba(224, 27, 27, 0) 80%);
+}
+.faceoff-veil-j2 {
+  background: linear-gradient(270deg, #1B3563 0%, #1B3563 34%, rgba(27, 53, 99, 0.6) 55%, rgba(27, 53, 99, 0) 80%);
+}
+@media (min-width: 768px) {
+  .faceoff-photo-j1 { left: 0; right: auto; width: 75%; }
+  .faceoff-photo-j2 { right: 0; left: auto; width: 75%; }
+  .faceoff-veil-j1 {
+    background: linear-gradient(270deg, #E01B1B 0%, #E01B1B 32%, rgba(224, 27, 27, 0.55) 52%, rgba(224, 27, 27, 0) 72%);
+  }
+  .faceoff-veil-j2 {
+    background: linear-gradient(90deg, #1B3563 0%, #1B3563 32%, rgba(27, 53, 99, 0.55) 52%, rgba(27, 53, 99, 0) 72%);
+  }
+}

@@ -5,6 +5,7 @@ import { Plus, Search, ArrowLeft, Edit2, Trash2, X, Check } from 'lucide-react';
 import { usePlayersStore } from '../store/playersStore';
 import { PlayerAvatar } from '../components/PlayerAvatar';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { PhotoPicker } from '../components/PhotoPicker';
 import { Player, Category } from '../types';
 
 const emptyForm = {
@@ -24,6 +25,7 @@ export default function Players() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const filtered = players.filter((p) => {
     const q = query.toLowerCase();
@@ -37,6 +39,7 @@ export default function Players() {
   function openAdd() {
     setForm(emptyForm);
     setEditingId(null);
+    setFormError(null);
     setShowForm(true);
   }
 
@@ -50,15 +53,22 @@ export default function Players() {
       photo: p.photo ?? '',
     });
     setEditingId(p.id);
+    setFormError(null);
     setShowForm(true);
   }
 
   function handleSubmit() {
     if (!form.nom.trim() || !form.prenom.trim()) return;
-    if (editingId) {
-      updatePlayer(editingId, form);
-    } else {
-      addPlayer(form);
+    try {
+      if (editingId) {
+        updatePlayer(editingId, form);
+      } else {
+        addPlayer(form);
+      }
+    } catch {
+      // Stockage local plein (photos trop nombreuses)
+      setFormError("Mémoire pleine : impossible d'enregistrer. Retire des photos d'anciens joueurs puis réessaie.");
+      return;
     }
     setShowForm(false);
   }
@@ -176,7 +186,7 @@ export default function Players() {
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
           >
             <motion.div
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-goat-navy-deep/80 backdrop-blur-sm"
               onClick={() => setShowForm(false)}
             />
             <motion.div
@@ -184,7 +194,7 @@ export default function Players() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 60, opacity: 0 }}
               transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-              className="relative glass rounded-2xl p-6 w-full max-w-md space-y-4"
+              className="relative bg-goat-navy-light border border-white/15 rounded-2xl p-6 w-full max-w-md space-y-4 max-h-[calc(100vh-2rem)] overflow-y-auto shadow-2xl shadow-black/40"
             >
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-3xl leading-none tracking-wide text-white">
@@ -197,6 +207,8 @@ export default function Players() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
+
+              <PhotoPicker value={form.photo} onChange={(photo) => setForm((f) => ({ ...f, photo }))} />
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -256,15 +268,7 @@ export default function Players() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs text-goat-mist-dim mb-1 block">URL Photo</label>
-                <input
-                  value={form.photo}
-                  onChange={(e) => setForm({ ...form, photo: e.target.value })}
-                  className="w-full bg-goat-navy-deep border border-white/10 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-goat-red transition-colors"
-                  placeholder="https://..."
-                />
-              </div>
+              {formError && <p className="text-sm text-goat-red-soft">{formError}</p>}
 
               <button
                 onClick={handleSubmit}
