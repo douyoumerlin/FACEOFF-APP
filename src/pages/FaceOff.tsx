@@ -101,6 +101,7 @@ function PlayerPanel({ player, side, score, faute, animate, onScore, onFaute }: 
         <div className={`flex flex-wrap gap-2 items-center ${isRed ? 'md:flex-row-reverse' : ''}`}>
           <ScoreButton side={side} label={`Un point pour ${name}`} onClick={() => onScore(1)}>+1</ScoreButton>
           <ScoreButton side={side} label={`Deux points pour ${name}`} onClick={() => onScore(2)}>+2</ScoreButton>
+          <ScoreButton side={side} label={`Trois points pour ${name}`} onClick={() => onScore(3)}>+3</ScoreButton>
           <ScoreButton side={side} variant="minus" label={`Retirer un point à ${name}`} onClick={() => onScore(-1)}>
             <Minus className="w-5 h-5" />
           </ScoreButton>
