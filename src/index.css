@@ -184,3 +184,14 @@ body {
     background: linear-gradient(90deg, #1B3563 0%, #1B3563 32%, rgba(27, 53, 99, 0.55) 52%, rgba(27, 53, 99, 0) 72%);
   }
 }
+
+/* Écran Vainqueur « Affiche du champion » : la photo se fond dans le bleu nuit.
+   Téléphone : vers le bas. Grand écran / Windows : vers la droite (texte à droite). */
+.winner-veil {
+  background: linear-gradient(180deg, rgba(18, 39, 74, 0.55) 0%, rgba(18, 39, 74, 0) 18%, rgba(18, 39, 74, 0) 36%, #12274A 66%);
+}
+@media (min-width: 768px) {
+  .winner-veil {
+    background: linear-gradient(270deg, #12274A 0%, #12274A 46%, rgba(18, 39, 74, 0.6) 58%, rgba(18, 39, 74, 0) 72%);
+  }
+}
